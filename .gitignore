@@ -1,7 +1,10 @@
 # large data files
-data/
+data/*
 !data/format_data.ipynb
 
+# Trained models
+models/*
+!models/model_four_params_Kbearing_c_20250916_131229.keras
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
