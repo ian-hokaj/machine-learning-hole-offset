@@ -3,11 +3,7 @@
 
 # # Testing ML Approaches on Data
 
-<<<<<<< HEAD
-# In[3]:
-=======
 # In[1]:
->>>>>>> 7b933b80b0d2e0cc98ae70a69266cc3cbfcaf47f
 
 
 import numpy as np
