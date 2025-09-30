@@ -64,7 +64,7 @@ model.compile(optimizer=optimizer, loss='mean_squared_error')
 
 # Train the model with EarlyStopping
 # early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
-model.fit(X_train_scaled, y_train_scaled, epochs=500, batch_size=64, validation_split=0.2)#, callbacks=[early_stop])
+history = model.fit(X_train_scaled, y_train_scaled, epochs=5, batch_size=64, validation_split=0.2)#, callbacks=[early_stop])
 
 # Save the model in the models/ directory with a filename containing the data name and timestamp
 from datetime import datetime
@@ -82,9 +82,10 @@ print(f"Test Loss: {test_loss}")
 
 # Construct appropriate plots for analysis
 # Plot training, validation, and test loss
-history = model.history.history
-plt.plot(history['loss'], label='train_loss')
-plt.plot(history['val_loss'], label='val_loss')
+# history = model.history.history
+print(history)
+plt.plot(history.history['loss'], label='train_loss')
+plt.plot(history.history['val_loss'], label='val_loss')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()

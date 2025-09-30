@@ -1,0 +1,13 @@
+Submitting parallel training jobs for batch sizes: 8 16 32 64 128
+Submitting job for batch size: 8
+Submitted batch job 3318853
+Submitting job for batch size: 16
+Submitted batch job 3318854
+Submitting job for batch size: 32
+Submitted batch job 3318855
+Submitting job for batch size: 64
+Submitted batch job 3318856
+Submitting job for batch size: 128
+Submitted batch job 3318857
+All jobs submitted! Check 'squeue -u $USER' to monitor job status.
+Output logs will be in the logs/ directory.

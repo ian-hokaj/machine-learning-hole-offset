@@ -4,7 +4,11 @@ data/*
 
 # Trained models
 models/*
-!models/model_four_params_Kbearing_c_20250916_131229.keras
+!models/current/
+
+# Logs
+logs/*
+!logs/current/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
