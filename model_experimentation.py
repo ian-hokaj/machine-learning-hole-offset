@@ -3,7 +3,11 @@
 
 # # Testing ML Approaches on Data
 
+<<<<<<< HEAD
 # In[3]:
+=======
+# In[1]:
+>>>>>>> 7b933b80b0d2e0cc98ae70a69266cc3cbfcaf47f
 
 
 import numpy as np
@@ -12,42 +16,37 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+import argparse
 import joblib
+from datetime import datetime
 
-# Use gpu if available
-physical_devices = tf.config.list_physical_devices('GPU')
-if physical_devices:
-    try:
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        print("GPU memory growth set")
-    except:
-        print("Could not set GPU memory growth")
-else:
-    print("No GPU found")
+# # Configure GPU usage
+# print("Checking GPU availability...")
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# if gpus:
+#     try:
+#         # Enable memory growth to avoid allocating all GPU memory at once
+#         for gpu in gpus:
+#             tf.config.experimental.set_memory_growth(gpu, True)
+#         print(f"Found {len(gpus)} GPU(s): {[gpu.name for gpu in gpus]}")
+#         print(f"TensorFlow will use GPU: {tf.test.is_gpu_available()}")
+#     except RuntimeError as e:
+#         print(f"GPU configuration error: {e}")
+# else:
+#     print("No GPUs found. Running on CPU.")
 
-
-# In[4]:
-
-
-# Check TensorFlow version and system info
-print(f"TensorFlow version: {tf.__version__}")
-print(f"CUDA build version: {tf.test.is_built_with_cuda()}")
-print(f"GPU devices available: {len(tf.config.list_physical_devices('GPU'))}")
-
-# Check for NVIDIA GPU via system command
-import subprocess
-try:
-    result = subprocess.run(['nvidia-smi'], capture_output=True, text=True, shell=True)
-    if result.returncode == 0:
-        print("NVIDIA GPU detected:")
-        print(result.stdout)
-    else:
-        print("nvidia-smi command failed - NVIDIA drivers may not be installed")
-except FileNotFoundError:
-    print("nvidia-smi not found - NVIDIA drivers not installed or not in PATH")
+# # Set mixed precision for better GPU performance (optional but recommended)
+# tf.keras.mixed_precision.set_global_policy('mixed_float16')
 
 
-# In[5]:
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Train ML model with configurable batch size, model type, and number of epochs')
+parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training (default: 16)')
+parser.add_argument('--model_type', type=str, default='default', help='Type of model to train (default: "default")')
+parser.add_argument('--num_epochs', type=int, default=50, help='Number of epochs for training (default: 50)')
+args = parser.parse_args()
+
+# In[2]:
 
 
 # Import the compressed data
@@ -83,44 +82,84 @@ y_train_scaled = y_scaler.fit_transform(y_train)
 y_test_scaled = y_scaler.transform(y_test)
 
 
-# In[6]:
+# In[3]:
+print(f"Training with model type: {args.model_type}")
 
+if args.model_type == "5_layer_DNN":
+    # Build a simple neural network model for a single SIF prediction output layer
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
+        layers.Dense(64),
+        layers.LeakyReLU(),
+        layers.Dense(64),
+        layers.LeakyReLU(),
+        layers.Dense(64),
+        layers.LeakyReLU(),
+        layers.Dense(32),
+        layers.LeakyReLU(),
+        layers.Dense(num_outputs)  # Single output layer
+    ])
 
-# Build a simple neural network model for a single SIF prediction output layer
-model = keras.Sequential([
-    layers.Input(shape=(X_train_scaled.shape[1],)),
-    layers.Dense(64),
-    layers.LeakyReLU(),
-    layers.Dense(64),
-    layers.LeakyReLU(),
-    layers.Dense(64),
-    layers.LeakyReLU(),
-    layers.Dense(32),
-    layers.LeakyReLU(),
-    layers.Dense(num_outputs)  # Single output layer
-])
+elif args.model_type == "3_layer_DNN":
+    # Build a simpler neural network model for a single SIF prediction output layer
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
+        layers.Dense(64),
+        layers.LeakyReLU(),
+        layers.Dense(32),
+        layers.LeakyReLU(),
+        layers.Dense(num_outputs)  # Single output layer
+    ])
+
+elif args.model_type == "default":
+    # Build a very simple neural network model for a single SIF prediction output layer
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
+        layers.Dense(32),
+        layers.LeakyReLU(),
+        layers.Dense(num_outputs)  # Single output layer
+    ])
+
+elif args.model_type == "ridge_regression":
+    # Use tensorflow to create a linear regression model (ridge regression)
+    lambda_value = 0.01  # Regularization strength
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],),),
+        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l2(lambda_value))  # Single output layer
+    ])
+
+elif args.model_type == "lasso_regression":
+    # Use tensorflow to create a linear regression model (lasso regression)
+    lambda_value = 0.01  # Regularization strength
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
+        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l1(lambda_value))  # Single output layer
+    ])
+
 # Compile the model, with Adam optimizer and a learning rate of 0.001
 optimizer = keras.optimizers.Adam(learning_rate=0.001)
 model.compile(optimizer=optimizer, loss='mean_squared_error')
 
 
-# In[ ]:
+# In[4]:
 
 
 # Train the model with EarlyStopping
-# early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
-model.fit(X_train_scaled, y_train_scaled, epochs=100, batch_size=32, validation_split=0.2)#, callbacks=[early_stop])
+print(f"Training with batch size: {args.batch_size}, epochs: {args.num_epochs}")
+model.fit(X_train_scaled, y_train_scaled, epochs=args.num_epochs, batch_size=args.batch_size, validation_split=0.2)#, callbacks=[early_stop])
 
-# Save the model in the models/ directory with a filename containing the data name and timestamp
-from datetime import datetime
+# Save the model in the models/ directory with a filename containing the data name, model type, batch size, num_epochs, and timestamp
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-model.save(f'models/model_{dataset_name}_{timestamp}.keras')
+model_filename = f'models/current/model_{dataset_name}_modeltype_{args.model_type}_batch{args.batch_size}_epochs{args.num_epochs}_{timestamp}.keras'
+model.save(model_filename)
+print(f"Model saved as: {model_filename}")
 
-# Save the model history for plotting training/validation loss later
-history = model.history.history
-np.save(f'models/history_{dataset_name}_{timestamp}.npy', history)
+# Save the model history in the models directory
+history_filename = f'models/current/history_{dataset_name}_modeltype_{args.model_type}_batch{args.batch_size}_epochs{args.num_epochs}_{timestamp}.pkl'
+joblib.dump(model.history.history, history_filename)
+print(f"Model history saved as: {history_filename}")
 
 # Save the scaler objects to scale/unscale future data
-joblib.dump(X_scaler, 'models/X_scaler.save')
-joblib.dump(y_scaler, 'models/y_scaler.save')
+joblib.dump(X_scaler, 'models/current/X_scaler.save')
+joblib.dump(y_scaler, 'models/current/y_scaler.save')
 
