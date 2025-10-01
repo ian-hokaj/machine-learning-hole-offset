@@ -17,7 +17,7 @@ source /etc/profile
 module load anaconda/2023a-tensorflow
 
 # Default batch sizes to experiment with
-num_epochs=50
+num_epochs=5
 batch_sizes=(8 16 32 64 128)
 model_names=("default" "ridge_regression" "lasso_regression" "3_layer_DNN" "5_layer_DNN")
 

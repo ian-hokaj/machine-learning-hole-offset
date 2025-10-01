@@ -11,10 +11,10 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
 import argparse
 import joblib
 from datetime import datetime
+import json
 
 # # Configure GPU usage
 # print("Checking GPU availability...")
@@ -67,15 +67,27 @@ y_train = train_data[:, -num_outputs:]
 X_test = test_data[:, :-num_outputs]
 y_test = test_data[:, -num_outputs:]
 
-# Scale the features
-X_scaler = StandardScaler()
-X_train_scaled = X_scaler.fit_transform(X_train)
-X_test_scaled = X_scaler.transform(X_test)
+# Convert to TensorFlow tensors
+X_train_tf = tf.constant(X_train, dtype=tf.float32)
+y_train_tf = tf.constant(y_train, dtype=tf.float32)
+X_test_tf = tf.constant(X_test, dtype=tf.float32)
+y_test_tf = tf.constant(y_test, dtype=tf.float32)
 
-# Scale the labels
-y_scaler = StandardScaler()
-y_train_scaled = y_scaler.fit_transform(y_train)
-y_test_scaled = y_scaler.transform(y_test)
+# Calculate scaling parameters for features (mean and std)
+X_mean = tf.reduce_mean(X_train_tf, axis=0)
+X_std = tf.math.reduce_std(X_train_tf, axis=0)
+
+# Calculate scaling parameters for labels (mean and std)
+y_mean = tf.reduce_mean(y_train_tf, axis=0)
+y_std = tf.math.reduce_std(y_train_tf, axis=0)
+
+# Scale the features using TensorFlow operations
+X_train_scaled = (X_train_tf - X_mean) / X_std
+X_test_scaled = (X_test_tf - X_mean) / X_std
+
+# Scale the labels using TensorFlow operations
+y_train_scaled = (y_train_tf - y_mean) / y_std
+y_test_scaled = (y_test_tf - y_mean) / y_std
 
 
 # In[3]:
@@ -155,7 +167,22 @@ history_filename = f'models/current/history_{dataset_name}_modeltype_{args.model
 joblib.dump(model.history.history, history_filename)
 print(f"Model history saved as: {history_filename}")
 
-# Save the scaler objects to scale/unscale future data
-joblib.dump(X_scaler, 'models/current/X_scaler.save')
-joblib.dump(y_scaler, 'models/current/y_scaler.save')
+# Save the scaler parameters to scale/unscale future data
+X_scaler_params = {
+    'mean': X_mean.numpy().tolist(),
+    'std': X_std.numpy().tolist()
+}
+y_scaler_params = {
+    'mean': y_mean.numpy().tolist(), 
+    'std': y_std.numpy().tolist()
+}
+
+# Save scaling parameters as JSON files
+with open('models/current/X_scaler_params.json', 'w') as f:
+    json.dump(X_scaler_params, f)
+    
+with open('models/current/y_scaler_params.json', 'w') as f:
+    json.dump(y_scaler_params, f)
+
+print("Scaling parameters saved as JSON files")
 
