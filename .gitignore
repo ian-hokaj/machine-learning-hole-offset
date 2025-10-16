@@ -6,7 +6,7 @@ data/*
 
 # Trained models
 models/*
-!models/current/
+# !models/current/
 
 # Logs
 logs/*

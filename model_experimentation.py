@@ -37,16 +37,18 @@ import json
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Train ML model with configurable batch size, model type, and number of epochs')
+parser.add_argument('--data_file', type=str, default='four_params_Kbearing_c', help='Path to the input data file (default: four_params_Kbearing_c)')
 parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training (default: 16)')
 parser.add_argument('--model_type', type=str, default='default', help='Type of model to train (default: "default")')
 parser.add_argument('--num_epochs', type=int, default=50, help='Number of epochs for training (default: 50)')
+parser.add_argument('--reg_strength', type=float, default=0.0001, help='Regularization strength for regression models (default: 0.0001)')
 args = parser.parse_args()
 
 # In[2]:
 
 
 # Import the compressed data
-dataset_name = 'four_params_Kbearing_c'
+dataset_name = args.data_file
 data_array = np.load(f'data/{dataset_name}.npy')
 num_outputs = 1  # Change this based on the number of outputs in your dataset
 
@@ -81,6 +83,11 @@ X_std = tf.math.reduce_std(X_train_tf, axis=0)
 y_mean = tf.reduce_mean(y_train_tf, axis=0)
 y_std = tf.math.reduce_std(y_train_tf, axis=0)
 
+print(f"X mean: {X_mean}")
+print(f"X_std: {X_std}")
+print(f"y mean: {y_mean}")
+print(f"y std: {y_std}")
+
 # Scale the features using TensorFlow operations
 X_train_scaled = (X_train_tf - X_mean) / X_std
 X_test_scaled = (X_test_tf - X_mean) / X_std
@@ -99,6 +106,19 @@ if args.model_type == "5_layer_DNN":
         layers.Input(shape=(X_train_scaled.shape[1],)),
         layers.Dense(64),
         layers.LeakyReLU(),
+        layers.Dense(64),
+        layers.LeakyReLU(),
+        layers.Dense(64),
+        layers.LeakyReLU(),
+        layers.Dense(32),
+        layers.LeakyReLU(),
+        layers.Dense(num_outputs)  # Single output layer
+    ])
+
+elif args.model_type == "4_layer_DNN":
+    # Build a simpler neural network model for a single SIF prediction output layer
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
         layers.Dense(64),
         layers.LeakyReLU(),
         layers.Dense(64),
@@ -130,18 +150,42 @@ elif args.model_type == "default":
 
 elif args.model_type == "ridge_regression":
     # Use tensorflow to create a linear regression model (ridge regression)
-    lambda_value = 0.01  # Regularization strength
     model = keras.Sequential([
         layers.Input(shape=(X_train_scaled.shape[1],),),
-        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l2(lambda_value))  # Single output layer
+        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l2(args.reg_strength))  # Single output layer
     ])
 
 elif args.model_type == "lasso_regression":
     # Use tensorflow to create a linear regression model (lasso regression)
-    lambda_value = 0.01  # Regularization strength
     model = keras.Sequential([
         layers.Input(shape=(X_train_scaled.shape[1],)),
-        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l1(lambda_value))  # Single output layer
+        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l1(args.reg_strength))  # Single output layer
+    ])
+
+elif args.model_type == "4_layer_lasso_regression":
+    # Use tensorflow to create a linear regression model (lasso regression)
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
+        layers.Dense(64, kernel_regularizer=keras.regularizers.l1(args.reg_strength)),
+        layers.LeakyReLU(),
+        layers.Dense(64, kernel_regularizer=keras.regularizers.l1(args.reg_strength)),
+        layers.LeakyReLU(),
+        layers.Dense(32, kernel_regularizer=keras.regularizers.l1(args.reg_strength)),
+        layers.LeakyReLU(),
+        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l1(args.reg_strength))  # Single output layer
+    ])
+
+elif args.model_type == "4_layer_ridge_regression":
+    # Use tensorflow to create a linear regression model (ridge regression)
+    model = keras.Sequential([
+        layers.Input(shape=(X_train_scaled.shape[1],)),
+        layers.Dense(64, kernel_regularizer=keras.regularizers.l2(args.reg_strength)),
+        layers.LeakyReLU(),
+        layers.Dense(64, kernel_regularizer=keras.regularizers.l2(args.reg_strength)),
+        layers.LeakyReLU(),
+        layers.Dense(32, kernel_regularizer=keras.regularizers.l2(args.reg_strength)),
+        layers.LeakyReLU(),
+        layers.Dense(num_outputs, kernel_regularizer=keras.regularizers.l2(args.reg_strength))  # Single output layer
     ])
 
 # Compile the model, with Adam optimizer and a learning rate of 0.001
@@ -158,12 +202,12 @@ model.fit(X_train_scaled, y_train_scaled, epochs=args.num_epochs, batch_size=arg
 
 # Save the model in the models/ directory with a filename containing the data name, model type, batch size, num_epochs, and timestamp
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-model_filename = f'models/current/model_{dataset_name}_modeltype_{args.model_type}_batch{args.batch_size}_epochs{args.num_epochs}_{timestamp}.keras'
+model_filename = f'models/current/model_{dataset_name}_modeltype_{args.model_type}_batch{args.batch_size}_epochs{args.num_epochs}_regstrength{args.reg_strength}_{timestamp}.keras'
 model.save(model_filename)
 print(f"Model saved as: {model_filename}")
 
 # Save the model history in the models directory
-history_filename = f'models/current/history_{dataset_name}_modeltype_{args.model_type}_batch{args.batch_size}_epochs{args.num_epochs}_{timestamp}.pkl'
+history_filename = f'models/current/history_{dataset_name}_modeltype_{args.model_type}_batch{args.batch_size}_epochs{args.num_epochs}_regstrength{args.reg_strength}_{timestamp}.pkl'
 joblib.dump(model.history.history, history_filename)
 print(f"Model history saved as: {history_filename}")
 
