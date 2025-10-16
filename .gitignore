@@ -8,6 +8,10 @@ data/*
 models/*
 # !models/current/
 
+Notes.txt
+PracticalHPCCommands.txt
+logs/
+
 # Logs
 logs/*
 !logs/current/
