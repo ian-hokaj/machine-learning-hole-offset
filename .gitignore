@@ -12,14 +12,11 @@ Notes.txt
 PracticalHPCCommands.txt
 logs/
 
+report/
+
 # Logs
 logs/*
 !logs/current/
-
-*.out
-*.pkl
-*.keras
-*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

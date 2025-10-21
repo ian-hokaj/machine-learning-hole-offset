@@ -14,7 +14,7 @@ Attempt to use machine learning to approximate the Stress Intensity Factors (SIF
 
 - A simpler metric without extracting additional ML data would be:
     - Compute \epsilon_AFGORW regressing on training dataset, predicting on test dataset. Compare with \epsilon_MLmodel from test loss
-    - 
+    - This may give AFGROW method a leg up as interpolation is done along the known dimensions. A good starting point nonetheless
 
 ## Models under investigation
 - Standard NN (4-5 layer)
