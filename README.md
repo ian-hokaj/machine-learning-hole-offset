@@ -54,3 +54,11 @@ Attempt to use machine learning to approximate the Stress Intensity Factors (SIF
 
 ### Phase 4: Expanding to new datasets
 [ ] 
+
+
+## Bad data indices
+
+Ktension - squiggly
+71848
+71313
+71488

@@ -3,6 +3,8 @@ evaluate_models.ipynb
 # large data files
 data/*
 !data/format_data.ipynb
+!data/import_data.ipynb
+!data/find_outliers.ipynb
 
 # Trained models
 models/*
