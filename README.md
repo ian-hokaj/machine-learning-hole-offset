@@ -62,3 +62,41 @@ Ktension - squiggly
 71848
 71313
 71488
+
+### Notes
+
+
+### Notable bad param combinations
+Free parameter: R_over_t
+Fixed parameters: w_over_r=15.000, a_over_c=1.250, a_over_t=0.950
+Free parameter: R_over_t
+Fixed parameters: w_over_r=15.000, a_over_c=1.500, a_over_t=0.950
+Free parameter: R_over_t
+Fixed parameters: w_over_r=15.000, a_over_c=1.333, a_over_t=0.950
+Best: Deg 3 thresh 1.5
+
+Free parameter: R_over_t
+Fixed parameters: w_over_r=12.000, a_over_c=3.000, a_over_t=0.900
+Free parameter: R_over_t
+Fixed parameters: w_over_r=12.000, a_over_c=3.000, a_over_t=0.900
+Free parameter: R_over_t
+Fixed parameters: w_over_r=10.000, a_over_c=3.000, a_over_t=0.900
+Free parameter: R_over_t
+Fixed parameters: w_over_r=12.000, a_over_c=1.333, a_over_t=0.900
+
+Free parameter: R_over_t
+Fixed parameters: w_over_r=15.000, a_over_c=0.750, a_over_t=0.500
+Free parameter: R_over_t
+Fixed parameters: w_over_r=10.000, a_over_c=1.500, a_over_t=0.400
+Free parameter: R_over_t
+Fixed parameters: w_over_r=15.000, a_over_c=1.500, a_over_t=0.500
+
+Combinations that are problematic
+Free parameter: a_over_c
+Fixed parameters: a_over_t=0.100, R_over_t=0.571
+Free parameter: a_over_c
+Fixed parameters: w_over_r=1.600, a_over_t=0.100, R_over_t=0.444
+
+NOT CAPTURING TREND WELL!
+Free parameter: R_over_t
+Fixed parameters: w_over_r=15.000, a_over_c=3.000, a_over_t=0.950
